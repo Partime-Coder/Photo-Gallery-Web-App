@@ -1,10 +1,16 @@
 import React, { useState } from 'react'
 import { FaHeart } from "react-icons/fa";
-function PhotoCard({ photo }) {
+function PhotoCard({ photo, favourites, dispatch }) {
   const [loaded, setLoaded] = useState(false);
 
+  const isFav = favourites.includes(photo.id)
+
+  const toggleFavourite = () => {
+    dispatch({ type: "TOGGLE_FAVOURITE", payload: photo.id });
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg">
+    <div className="bg-white rounded-lg shadow overflow-hidden transform transition duration-100 hover:cursor-pointer hover:scale-105 hover:shadow-lg">
       <img
         src={photo.download_url}
         alt={photo.author}
@@ -16,8 +22,10 @@ function PhotoCard({ photo }) {
       />
       <div className="p-3 flex justify-between items-center">
         <p className="text-sm font-medium text-gray-700">{photo.author}</p>
-        <button>
-          <FaHeart className="text-gray-700 text-[22px] transition-colors duration-300 hover:text-red-600 hover:scale-110" />
+        <button onClick={toggleFavourite}>
+          <FaHeart className={` text-[22px] transition-colors duration-100  hover:scale-110 hover:cursor-pointer ${
+            isFav? "text-red-600 ": "text-gray-700 hover:text-red-600" 
+          }`} />
         </button>
       </div>
     </div>

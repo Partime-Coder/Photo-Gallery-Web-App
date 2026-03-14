@@ -1,23 +1,34 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import useFetchPhotos from '../../customHooks/useFetchPhotos'
-import {PhotoGrid , SearchInput} from '../index'
-function PhotoGallery() {
-    const {photos, loading, error} = useFetchPhotos();
-    const [search, setSearch] = useState("");
+import { PhotoGrid, SearchInput } from '../index'
+import { favouriteReducer } from '../../reducers/favouriteReducer';
+import { getFavourites } from '../../service/localStorageService';
 
-    const searchHandler = useCallback((e)=>{
-      setSearch(e.target.value)
-    },[]);
-    const filteredPhotos = useMemo(() => {
+function PhotoGallery() {
+  const { photos, loading, error } = useFetchPhotos();
+  const [search, setSearch] = useState("");
+  const [favourites, dispatch] = useReducer(favouriteReducer, []);
+
+  useEffect(() => {
+    const favData = getFavourites();
+    dispatch({ type: "INIT_FAVOURITES", payload: favData });
+    console.log("favourite image List:", favData);
+    
+  }, []);
+
+  const searchHandler = useCallback((e) => {
+    setSearch(e.target.value)
+  }, []);
+  const filteredPhotos = useMemo(() => {
     return photos.filter((photo) =>
       photo.author.toLowerCase().includes(search.toLowerCase())
     );
   }, [photos, search]);
-    
 
-   return (
+
+  return (
     <section className="py-4 md:py-8 ">
-      <h1 className=" text-3xl md:text-6xl font-bold text-[#4E9358] text-center py-8 ">Photo Gallery</h1> 
+      <h1 className=" text-3xl md:text-6xl font-bold text-[#4E9358] text-center py-8 ">Photo Gallery</h1>
       <SearchInput value={search} onChange={searchHandler} />
       <div className="mt-4">
         {loading && (
@@ -32,12 +43,15 @@ function PhotoGallery() {
           </div>
         )}
 
-       
+
         {!loading && !error && filteredPhotos.length > 0 && (
-          <PhotoGrid photos={filteredPhotos} />
+          <PhotoGrid
+            photos={filteredPhotos}
+            favourites={favourites}
+            dispatch={dispatch} />
         )}
 
-        
+
         {!loading && !error && filteredPhotos.length === 0 && (
           <p className="text-center text-gray-500 py-10">
             No photos match your search.
